@@ -40,7 +40,6 @@ const getGitInfo = () => {
   }
 };
 
-// Read package.json with detailed dependency info
 const getPackageJson = () => {
   try {
     const pkgPath = join(process.cwd(), 'package.json');
@@ -90,8 +89,35 @@ export default defineConfig((config) => {
       __PKG_PEER_DEPENDENCIES: JSON.stringify(pkg.peerDependencies),
       __PKG_OPTIONAL_DEPENDENCIES: JSON.stringify(pkg.optionalDependencies),
     },
+    server: {
+      port: 3000, // Set default port <sup className="rounded-full text-xs cursor-pointer [&>*]:!text-white h-4 w-4 px-1 bg-zinc-400 hover:bg-zinc-500 dark:bg-zinc-700 hover:dark:bg-zinc-600">[8](https://medium.com/@ajithr116/vit-f96ce1446aff)</sup> 
+      allowedHosts: [
+        'boltdiy-production-6f13.up.railway.app',
+        '*.railway.app',
+        'localhost',
+        '*.localhost'
+      ],
+      host: true, // Allow access from all network interfaces <sup className="rounded-full text-xs cursor-pointer [&>*]:!text-white h-4 w-4 px-1 bg-zinc-400 hover:bg-zinc-500 dark:bg-zinc-700 hover:dark:bg-zinc-600">[2](https://vite.dev/config/server-options)</sup> 
+      proxy: {
+        '/api': {
+          target: process.env.VITE_API_URL || 'http://localhost:5000',
+          changeOrigin: true,
+          secure: false,
+        }
+      }
+    },
     build: {
       target: 'esnext',
+      outDir: 'dist', // Specify build output directory <sup className="rounded-full text-xs cursor-pointer [&>*]:!text-white h-4 w-4 px-1 bg-zinc-400 hover:bg-zinc-500 dark:bg-zinc-700 hover:dark:bg-zinc-600">[8](https://medium.com/@ajithr116/vit-f96ce1446aff)</sup> 
+      sourcemap: true, // Enable source maps for debugging <sup className="rounded-full text-xs cursor-pointer [&>*]:!text-white h-4 w-4 px-1 bg-zinc-400 hover:bg-zinc-500 dark:bg-zinc-700 hover:dark:bg-zinc-600">[8](https://medium.com/@ajithr116/vit-f96ce1446aff)</sup> 
+      cssCodeSplit: true, // Enable CSS code splitting <sup className="rounded-full text-xs cursor-pointer [&>*]:!text-white h-4 w-4 px-1 bg-zinc-400 hover:bg-zinc-500 dark:bg-zinc-700 hover:dark:bg-zinc-600">[9](https://www.restack.io/p/vite-answer-config-example-guide)</sup> 
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            vendor: ['react', 'react-dom'], // Split vendor chunks <sup className="rounded-full text-xs cursor-pointer [&>*]:!text-white h-4 w-4 px-1 bg-zinc-400 hover:bg-zinc-500 dark:bg-zinc-700 hover:dark:bg-zinc-600">[9](https://www.restack.io/p/vite-answer-config-example-guide)</sup> 
+          }
+        }
+      }
     },
     plugins: [
       nodePolyfills({
@@ -124,7 +150,13 @@ export default defineConfig((config) => {
           api: 'modern-compiler',
         },
       },
+      modules: {
+        localsConvention: 'camelCase', // Use camelCase for CSS modules <sup className="rounded-full text-xs cursor-pointer [&>*]:!text-white h-4 w-4 px-1 bg-zinc-400 hover:bg-zinc-500 dark:bg-zinc-700 hover:dark:bg-zinc-600">[8](https://medium.com/@ajithr116/vit-f96ce1446aff)</sup> 
+      }
     },
+    optimizeDeps: {
+      include: ['react', 'react-dom'], // Pre-bundle these dependencies <sup className="rounded-full text-xs cursor-pointer [&>*]:!text-white h-4 w-4 px-1 bg-zinc-400 hover:bg-zinc-500 dark:bg-zinc-700 hover:dark:bg-zinc-600">[3](https://vite.dev/config/)</sup> 
+    }
   };
 });
 
@@ -143,11 +175,9 @@ function chrome129IssuePlugin() {
             res.end(
               '<body><h1>Please use Chrome Canary for testing.</h1><p>Chrome 129 has an issue with JavaScript modules & Vite local development, see <a href="https://github.com/stackblitz/bolt.new/issues/86#issuecomment-2395519258">for more information.</a></p><p><b>Note:</b> This only impacts <u>local development</u>. `pnpm run build` and `pnpm run start` will work fine in this browser.</p></body>',
             );
-
             return;
           }
         }
-
         next();
       });
     },
